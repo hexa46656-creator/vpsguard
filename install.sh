@@ -213,12 +213,32 @@ harden_ssh() {
 
   backup_sshd_config
 
+  # Keep the current SSH port.
+  # VPSGuard only allows this port in UFW to avoid accidental lockout.
   set_sshd_option "Port" "$SSH_PORT"
+
+  # Disable direct root SSH login.
+  # After this change, you should log in as the sudo user instead of root.
   set_sshd_option "PermitRootLogin" "no"
-  set_sshd_option "PasswordAuthentication" "no"
-  set_sshd_option "KbdInteractiveAuthentication" "no"
+
+  # Enable SSH public key authentication.
+  # This allows login with SSH keys, which is safer than password login.
   set_sshd_option "PubkeyAuthentication" "yes"
+
+  # Disable SSH password authentication.
+  # This blocks direct password-based SSH login and reduces brute-force risk.
+  set_sshd_option "PasswordAuthentication" "no"
+
+  # Disable keyboard-interactive authentication.
+  # This prevents alternative interactive password prompts such as PAM challenge-response login.
+  set_sshd_option "KbdInteractiveAuthentication" "no"
+
+  # Disable empty password login.
+  # This ensures users with empty passwords cannot log in through SSH.
   set_sshd_option "PermitEmptyPasswords" "no"
+
+  # Disable X11 forwarding.
+  # This reduces unnecessary SSH features and lowers the attack surface on a server.
   set_sshd_option "X11Forwarding" "no"
 
   if sshd -t; then
